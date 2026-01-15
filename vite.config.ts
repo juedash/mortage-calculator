@@ -16,6 +16,8 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+
+  base: "/mortage-calculator/",
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
