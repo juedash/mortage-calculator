@@ -1,67 +1,78 @@
-import { describe, it, expect } from 'vitest'
-import { ref } from 'vue'
-import { useMortgageCalculator } from './useMortgageCalculator'
+import { describe, it, expect } from "vitest"
+import { ref } from "vue"
+import { useMortgageCalculator } from "./useMortgageCalculator"
 
-describe('useMortgageCalculator', () => {
-  it('computes costs, total, loan, and ltv when commission is off', () => {
-    const propertyPrice = ref(320000)
-    const totalSavings = ref(80000)
-    const commission = ref(false)
+function setup(overrides?: Partial<{
+  propertyPrice: number
+  totalSavings: number
+  commission: boolean
+  brokerTax: number
+  cityTax: number
+}>) {
+  const propertyPrice = ref(overrides?.propertyPrice ?? 320000)
+  const totalSavings = ref(overrides?.totalSavings ?? 80000)
+  const commission = ref(overrides?.commission ?? false)
 
-    const brokerTax = 0.0357
-    const cityTax = 0.06
+  const brokerTax = overrides?.brokerTax ?? 0.0357
+  const cityTax = overrides?.cityTax ?? 0.06
 
-    const { notaryCosts, brokerCosts, stampDutyCosts, totalCost, rawLoanAmount, loanToValue } =
-      useMortgageCalculator({
-        propertyPrice,
-        totalSavings,
-        commission,
-        brokerTax,
-        cityTax,
-      })
-
-    // notary: 2144 + 0.013 * (320000 - 100000) = 2144 + 2860 = 5004
-    expect(notaryCosts.value).toBe(5004)
-
-    // commission off
-    expect(brokerCosts.value).toBe(0)
-
-    // stamp duty: 0.06 * 320000 = 19200
-    expect(stampDutyCosts.value).toBe(19200)
-
-    // total: 5004 + 0 + 19200 = 24204
-    expect(totalCost.value).toBe(24204)
-
-    // loan: total - savings + price = 24204 - 80000 + 320000 = 264204
-    expect(rawLoanAmount.value).toBe(264204)
-
-    // ltv: 264204 / 320000 = 0.8256375
-    expect(loanToValue.value).toBeCloseTo(0.8256375, 10)
+  const calc = useMortgageCalculator({
+    propertyPrice,
+    totalSavings,
+    commission,
+    brokerTax,
+    cityTax,
   })
 
-  it('includes broker costs when commission is on', () => {
-    const propertyPrice = ref(320000)
-    const totalSavings = ref(80000)
-    const commission = ref(true)
+  return { propertyPrice, totalSavings, commission, brokerTax, cityTax, ...calc }
+}
 
-    const brokerTax = 0.0357
-    const cityTax = 0.06
+describe("useMortgageCalculator", () => {
+  it("computes costs, total, loan, and ltv when commission is off", () => {
+    const {
+      notaryCosts,
+      brokerCosts,
+      stampDutyCosts,
+      totalCost,
+      rawLoanAmount,
+      loanToValue,
+    } = setup({ commission: false })
 
-    const { brokerCosts, totalCost, rawLoanAmount } = useMortgageCalculator({
-      propertyPrice,
-      totalSavings,
-      commission,
-      brokerTax,
-      cityTax,
+    expect(notaryCosts.value).toBe(5004)
+    expect(brokerCosts.value).toBe(0)
+    expect(stampDutyCosts.value).toBe(19200)
+    expect(totalCost.value).toBe(24204)
+    expect(rawLoanAmount.value).toBe(264204)
+    expect(loanToValue.value).toBeCloseTo(264204 / 320000, 10)
+  })
+
+  it("includes broker costs when commission is on", () => {
+    const { brokerCosts, totalCost, rawLoanAmount, loanToValue } = setup({ commission: true })
+
+    expect(brokerCosts.value).toBe(11424)
+    expect(totalCost.value).toBe(35628)
+    expect(rawLoanAmount.value).toBe(275628)
+    expect(loanToValue.value).toBeCloseTo(275628 / 320000, 10)
+  })
+
+  it("reacts when savings and price change", () => {
+    const { propertyPrice, totalSavings, rawLoanAmount, loanToValue } = setup({
+      commission: false,
+      propertyPrice: 320000,
+      totalSavings: 80000,
     })
 
-    // broker: 0.0357 * 320000 = 11424
-    expect(brokerCosts.value).toBe(11424)
+    const firstLoan = rawLoanAmount.value
 
-    // total: 5004 + 11424 + 19200 = 35628
-    expect(totalCost.value).toBe(35628)
+    totalSavings.value += 10_000
+    expect(rawLoanAmount.value).toBe(firstLoan - 10_000)
 
-    // loan: 35628 - 80000 + 320000 = 275628
-    expect(rawLoanAmount.value).toBe(275628)
+    propertyPrice.value = 400_000
+    expect(loanToValue.value).toBeCloseTo(rawLoanAmount.value / 400_000, 10)
+  })
+
+  it("returns loanToValue = 0 when propertyPrice <= 0", () => {
+    const { loanToValue } = setup({ propertyPrice: 0 })
+    expect(loanToValue.value).toBe(0)
   })
 })
