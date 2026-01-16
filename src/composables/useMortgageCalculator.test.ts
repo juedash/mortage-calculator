@@ -1,14 +1,16 @@
-import { describe, it, expect } from "vitest"
-import { ref } from "vue"
-import { useMortgageCalculator } from "./useMortgageCalculator"
+import { describe, it, expect } from 'vitest'
+import { ref } from 'vue'
+import { useMortgageCalculator } from './useMortgageCalculator'
 
-function setup(overrides?: Partial<{
-  propertyPrice: number
-  totalSavings: number
-  commission: boolean
-  brokerTax: number
-  cityTax: number
-}>) {
+function setup(
+  overrides?: Partial<{
+    propertyPrice: number
+    totalSavings: number
+    commission: boolean
+    brokerTax: number
+    cityTax: number
+  }>,
+) {
   const propertyPrice = ref(overrides?.propertyPrice ?? 320000)
   const totalSavings = ref(overrides?.totalSavings ?? 80000)
   const commission = ref(overrides?.commission ?? false)
@@ -27,16 +29,10 @@ function setup(overrides?: Partial<{
   return { propertyPrice, totalSavings, commission, brokerTax, cityTax, ...calc }
 }
 
-describe("useMortgageCalculator", () => {
-  it("computes costs, total, loan, and ltv when commission is off", () => {
-    const {
-      notaryCosts,
-      brokerCosts,
-      stampDutyCosts,
-      totalCost,
-      rawLoanAmount,
-      loanToValue,
-    } = setup({ commission: false })
+describe('useMortgageCalculator', () => {
+  it('computes costs, total, loan, and ltv when commission is off', () => {
+    const { notaryCosts, brokerCosts, stampDutyCosts, totalCost, rawLoanAmount, loanToValue } =
+      setup({ commission: false })
 
     expect(notaryCosts.value).toBe(5004)
     expect(brokerCosts.value).toBe(0)
@@ -46,7 +42,7 @@ describe("useMortgageCalculator", () => {
     expect(loanToValue.value).toBeCloseTo(264204 / 320000, 10)
   })
 
-  it("includes broker costs when commission is on", () => {
+  it('includes broker costs when commission is on', () => {
     const { brokerCosts, totalCost, rawLoanAmount, loanToValue } = setup({ commission: true })
 
     expect(brokerCosts.value).toBe(11424)
@@ -55,7 +51,7 @@ describe("useMortgageCalculator", () => {
     expect(loanToValue.value).toBeCloseTo(275628 / 320000, 10)
   })
 
-  it("reacts when savings and price change", () => {
+  it('reacts when savings and price change', () => {
     const { propertyPrice, totalSavings, rawLoanAmount, loanToValue } = setup({
       commission: false,
       propertyPrice: 320000,
@@ -71,7 +67,7 @@ describe("useMortgageCalculator", () => {
     expect(loanToValue.value).toBeCloseTo(rawLoanAmount.value / 400_000, 10)
   })
 
-  it("returns loanToValue = 0 when propertyPrice <= 0", () => {
+  it('returns loanToValue = 0 when propertyPrice <= 0', () => {
     const { loanToValue } = setup({ propertyPrice: 0 })
     expect(loanToValue.value).toBe(0)
   })
