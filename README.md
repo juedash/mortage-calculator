@@ -26,6 +26,8 @@ A mortgage calculator built with Vue 3 and TypeScript.
 
 ## Project Setup
 
+Install dependencies:
+
 ```sh
 npm install
 ```
@@ -42,12 +44,25 @@ npm run dev
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Lint with ESLint
 
 ```sh
 npm run lint
+```
 
-### Unit Tests with [Vitest](https://eslint.org/)
+### Type check
+
+```sh
+npm run type-check
+```
+
+### Format using Prettier
+
+```sh
+npm run format
+```
+
+### Unit Tests with Vitest
 
 ```sh
 npm run test
