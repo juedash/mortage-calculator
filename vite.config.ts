@@ -15,6 +15,14 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
+    proxy: {
+      "/api": {
+        target: "https://hypofriend.de",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
 
   base: "/mortage-calculator/",
