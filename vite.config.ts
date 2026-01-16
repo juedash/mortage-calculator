@@ -30,7 +30,7 @@ export default defineConfig({
     },
   },
 
-  base: "/mortage-calculator/",
+  base: "./",
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
