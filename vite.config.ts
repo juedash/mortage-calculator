@@ -1,10 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
 
-import { defineConfig } from 'vite'
+import { defineConfig } from "vitest/config"
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
-
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,6 +12,12 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss(),
   ],
+
+  test: {
+    environment: "node",
+    globals: true,
+    include: ["src/**/*.test.ts"],
+  },
   server: {
     port: 3000,
     proxy: {
