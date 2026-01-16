@@ -5,7 +5,7 @@
     <div class="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-3 py-2">
       <button
         type="button"
-        class="grid h-8 w-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-200 hover:text-primary active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 place-items-center rounded-md text-primary transition hover:bg-slate-200 hover:text-primary active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
         :disabled="disabled || (min !== undefined && modelValue <= min)"
         @click="stepDown"
         aria-label="Decrease value"
@@ -30,7 +30,7 @@
 
       <button
         type="button"
-        class="grid h-8 w-8 place-items-center rounded-md text-slate-500 transition hover:bg-slate-200 hover:text-primary active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        class="grid h-8 w-8 place-items-center rounded-md text-primary transition hover:bg-slate-200 hover:text-primary active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
         :disabled="disabled || (max !== undefined && modelValue >= max)"
         @click="stepUp"
         aria-label="Increase value"
@@ -67,7 +67,6 @@ const raw = ref(String(props.modelValue))
 watch(
   () => props.modelValue,
   (v) => {
-    // keep input in sync when value changes from buttons/parent
     raw.value = String(v)
   },
 )

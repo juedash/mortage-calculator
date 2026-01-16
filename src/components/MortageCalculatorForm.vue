@@ -44,7 +44,7 @@
     <div class="space-y-1">
       <NumberStepper
         label="Property Purchase Price"
-        :model-value="propertyPrice"
+        :model-value="propertyPrice ?? 0"
         :step="1000"
         :min="0"
         required
@@ -57,7 +57,7 @@
     <div class="space-y-1">
       <NumberStepper
         label="Total Savings"
-        :model-value="totalSavings"
+        :model-value="totalSavings ?? 0"
         :step="1000"
         :min="0"
         required
@@ -93,7 +93,7 @@
     <button
       type="submit"
       :disabled="!meta.valid || isSubmitting"
-      class="w-full max-w-xs rounded-md hover:cursor-pointer bg-primary py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      class="w-full max-w-xs rounded-md hover:cursor-pointer bg-primary py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       Save
     </button>
@@ -105,8 +105,14 @@ import { useForm, useField, ErrorMessage } from 'vee-validate'
 import { object, boolean, number } from 'yup'
 import NumberStepper from './NumberStepper.vue'
 import { useDebounceFn } from '@vueuse/core'
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import type { MortgageFormValues } from '@/types/MortageCalculator'
+
+type Props = {
+  initialValues: MortgageFormValues
+}
+
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'change', values: MortgageFormValues): void
@@ -115,17 +121,14 @@ const emit = defineEmits<{
 
 const schema = object({
   commission: boolean().required('Commission is required'),
-
   propertyPrice: number()
     .typeError('Property purchase price must be a number')
     .moreThan(0, 'Property purchase price must be greater than 0')
     .required('Property purchase price is required'),
-
   totalSavings: number()
     .typeError('Total savings must be a number')
     .moreThan(0, 'Total savings must be greater than 0')
     .required('Total savings is required'),
-
   annualRepaymentRate: number()
     .typeError('Annual repayment rate must be a number')
     .min(0, 'Must be 0 or more')
@@ -133,16 +136,21 @@ const schema = object({
     .required('Annual repayment rate is required'),
 })
 
-const { handleSubmit, validate, values, meta, isSubmitting } = useForm({
+const initial = computed(() => props.initialValues)
+
+const { handleSubmit, validate, values, meta, isSubmitting, resetForm } = useForm({
   validationSchema: schema,
   validateOnMount: true,
-  initialValues: {
-    commission: false,
-    propertyPrice: 320000,
-    totalSavings: 80000,
-    annualRepaymentRate: 2,
-  },
+  initialValues: initial.value,
 })
+
+watch(
+  initial,
+  (next) => {
+    resetForm({ values: next })
+  },
+  { deep: true },
+)
 
 const { value: commission } = useField<boolean>('commission')
 
@@ -175,14 +183,12 @@ const emitChange = useDebounceFn(async () => {
   const res = await validate()
   if (!res.valid) return
 
-  const payload: MortgageFormValues = {
+  emit('change', {
     commission: values.commission,
     propertyPrice: values.propertyPrice,
     totalSavings: values.totalSavings,
     annualRepaymentRate: values.annualRepaymentRate,
-  }
-
-  emit('change', payload)
+  })
 }, 500)
 
 const emitSubmit = useDebounceFn(() => {

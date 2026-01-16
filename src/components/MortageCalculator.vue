@@ -5,9 +5,20 @@
         <main class="md:col-span-2">
           <CardSkeleton>
             <h2 class="text-2xl font-semibold tracking-tight text-center">Mortgage Calculator</h2>
-
+            <p class="text-slate-400 text-center text-xs">
+              Calculations are made for region: <span class="capitalize">{{ location }}</span>
+            </p>
             <!-- use change for live calculations, submit for GraphQL -->
-            <MortageCalculatorForm @change="onFormChange" @submit="onFormSubmit" />
+            <MortageCalculatorForm
+              :initial-values="{
+                commission,
+                propertyPrice,
+                totalSavings,
+                annualRepaymentRate,
+              }"
+              @change="onFormChange"
+              @submit="onFormSubmit"
+            />
           </CardSkeleton>
         </main>
 
@@ -29,7 +40,11 @@
             <div v-if="loadingRates" class="text-sm text-slate-500">Loading rates…</div>
             <div v-else-if="ratesError" class="text-sm text-red-500">{{ ratesError }}</div>
             <div v-else-if="ratesTable">
-              <MortageCalculatorRatesTable :table="ratesTable" title="Rates table" subtitle="Based on your inputs" />
+              <MortageCalculatorRatesTable
+                :table="ratesTable"
+                title="Rates table"
+                subtitle="Based on your inputs"
+              />
             </div>
           </CardSkeleton>
         </aside>
@@ -39,14 +54,17 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-
-import type { MortgageFormValues } from '@/types/MortageCalculator'
 import CardSkeleton from './CardSkeleton.vue'
 import MortageCalculatorForm from './MortageCalculatorForm.vue'
 import MortageCalculatorRatesTable from './MortageCalculatorRatesTable.vue'
+import type { MortgageFormValues } from '@/types/MortageCalculator'
+
 import { useMortgageCalculator } from '@/composables/useMortgageCalculator'
-import { useTaxStore } from '@/stores/taxStore'
 import { useRatesTable } from '@/composables/useRatesTable'
+import { useTaxes } from '@/composables/useTaxes'
+
+import { useLocationStore } from '@/stores/location'
+
 const { ratesTable, loading: loadingRates, error: ratesError, fetchRatesTable } = useRatesTable()
 
 const propertyPrice = ref(320000)
@@ -54,15 +72,14 @@ const totalSavings = ref(80000)
 const commission = ref(false)
 const annualRepaymentRate = ref(2)
 
-const taxStore = useTaxStore()
-const { brokerTax, cityTax } = taxStore
+const { brokerTax, cityTax } = useTaxes()
 
 const { rawLoanAmount, loanToValue } = useMortgageCalculator({
   propertyPrice,
   totalSavings,
   commission,
-  brokerTax,
-  cityTax,
+  brokerTax: brokerTax.value,
+  cityTax: cityTax.value,
 })
 
 const formatMoney = (n: number) => n.toLocaleString()
@@ -81,4 +98,7 @@ const onFormSubmit = async () => {
     loanAmount: rawLoanAmount.value,
   })
 }
+
+const { region } = useLocationStore()
+const location = ref(region)
 </script>
