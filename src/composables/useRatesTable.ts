@@ -34,9 +34,9 @@ export const useRatesTable = () => {
 
       const res = await gql<{ root: { ratesTable: RatesTable } }>(query)
 
-      if (!res?.root?.ratesTable) throw new Error('Missing ratesTable in response')
+      if (!res?.root?.ratesTable) throw new Error("YYou couldn't fetch rates table")
       ratesTable.value = res.root.ratesTable
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       error.value = e?.message ?? 'Failed to fetch rates table'
       ratesTable.value = null

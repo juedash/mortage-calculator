@@ -1,4 +1,3 @@
-// src/composables/useMortgageCalculator.ts
 import { computed } from 'vue'
 import type { MortageCalculatorInputs } from '@/types/MortageCalculator'
 
