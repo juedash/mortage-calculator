@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { gql } from '@/api/hypofriend'
+import { gql } from '@/api/graphql'
 import type { RatesTable, FetchRatesTableArgs } from '@/types'
 
 export const useRatesTable = () => {
