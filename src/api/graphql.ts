@@ -9,7 +9,27 @@ export const gql = async <T>(query: string): Promise<T> => {
   if (res.data?.errors?.length) {
     throw new Error(res.data.errors[0]?.message ?? 'GraphQL error')
   }
-  if (!res.data?.data) throw new Error('Missing GraphQL data')
+  if (!res.data?.data) throw new Error('Missing  data')
 
   return res.data.data
+}
+
+export const fetchCityTax = async (region = 'berlin') => {
+  const q = `
+    mutation {
+      calculateCityTax(input: { region: "${region}" }) { tax }
+    }
+  `
+  const res = await gql<{ calculateCityTax: { tax: number } }>(q)
+  return res.calculateCityTax.tax
+}
+
+export const fetchBrokerTax = async (region = 'berlin', newProperty = false) => {
+  const q = `
+    mutation {
+      calculateMaklerFee(input: { region: "${region}", new_property: ${newProperty} }) { tax }
+    }
+  `
+  const res = await gql<{ calculateMaklerFee: { tax: number } }>(q)
+  return res.calculateMaklerFee.tax
 }
