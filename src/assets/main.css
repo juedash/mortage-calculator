@@ -1,7 +1,5 @@
-@import "tailwindcss";
-
+@import 'tailwindcss';
 
 @theme {
   --color-primary: #3f818f;
 }
-
